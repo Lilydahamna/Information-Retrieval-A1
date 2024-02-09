@@ -133,7 +133,13 @@ def preprocess_and_build_index(folder_path):
 # set folder path and initialize invertedIndex
 folder_path = 'coll'
 invertedIndex = {}
+
 all_docs_processed = {}
+'''
+A dictionary mapping document id's to a tuple containing document length and the stemmed words in a list
+{"DOC_id" : (5,['a', 'doc', 'with', '5', 'words']), ...}
+'''
+
 # Opening Vocabulary.txt and making a set out of the words
 with open('Vocabulary.txt', 'r') as file:
     # Create an empty set to store the words
