@@ -23,9 +23,9 @@ def buildAndUpdateIndex (documents):
             tuple being the document id, and the 2nd is a list of stemmed words [('ID',['another', 'word']), ()]
     The fcn. goes over each word and updating the index with the no. of times it appears in each doc
     '''
-    for docid, document in documents:
+    for docid, value in documents.items():
         documentid = docid
-        for word in document:
+        for word in value[1]:
             if word in vocabulary:
                 if word in invertedIndex:
                     currWordTfMap = invertedIndex.get(word)
@@ -91,13 +91,13 @@ def splitter(file):
     '''
     # first split all the documents in the file
     documents = re.findall(r'<DOC>(.*?)</DOC>', file, re.DOTALL)
-    processed_documents = []
+    processed_documents = {}
 
-    # process each document - a dcoument being everything contained in the <DOC> tags
+    # process each document - a document being everything contained in the <DOC> tags
     for document in documents:
-        processed_documents.append(process_document(document))
-    
-    
+        doc_id, processed_words = process_document(document)
+        processed_documents[doc_id] = (len(processed_words), processed_words)
+
     return processed_documents
 
 # Mostly taken from preprocess.py with some changes
@@ -110,7 +110,6 @@ def preprocess_and_build_index(folder_path):
     # List all files in the folder
     files = os.listdir(folder_path)
     
-    all_docs_processed = []
     # Iterate through each file
     file_count = 0
     for file_name in files:
@@ -124,6 +123,7 @@ def preprocess_and_build_index(folder_path):
         curr_file_processed_docs= splitter(documents)
         # build index for processed file
         buildAndUpdateIndex(curr_file_processed_docs)
+        all_docs_processed.update(curr_file_processed_docs)
         
         file_count +=1
         print('Processed file no. ', file_count, '... of ', len(files))
@@ -133,7 +133,7 @@ def preprocess_and_build_index(folder_path):
 # set folder path and initialize invertedIndex
 folder_path = 'coll'
 invertedIndex = {}
-
+all_docs_processed = {}
 # Opening Vocabulary.txt and making a set out of the words
 with open('Vocabulary.txt', 'r') as file:
     # Create an empty set to store the words
@@ -157,7 +157,7 @@ elapsed_time = end_time - start_time
 print("Elapsed time:", elapsed_time, "seconds")
 
 print ("Length of Inverted index is ", len(invertedIndex))
-
+print ("Length of all documents processed is ", len(all_docs_processed))
 # Specify the file path
 index_path = 'index.json'
 # Write the dictionary to the file
