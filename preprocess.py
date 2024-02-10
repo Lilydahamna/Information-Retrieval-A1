@@ -5,6 +5,7 @@ import re
 import os
 from sklearn.feature_extraction.text import CountVectorizer
 from nltk.stem import SnowballStemmer
+from nltk.tokenize import wordpunct_tokenize
 
 
 # Porter2 is an improved version of Porter Stemmer
@@ -16,22 +17,41 @@ markup_pattern = re.compile(r'<[^>]+>')
 nltk.download('stopwords')
 with open('StopWords.txt', 'r', encoding='utf-8') as file:
     provided_stop_words = file.read().split()
-stop = set(provided_stop_words) | set(stopwords.words('english'))
+stop_words = set(provided_stop_words) | set(stopwords.words('english'))
 
 documents = []
-processed_tokens = set()
-vectorizer = CountVectorizer(stop_words= list(stop), token_pattern=r'\b[a-z]+\b')
+
+def stemming_tokenizer(text):
+    result = []
+    # tokenizing
+    tokens = wordpunct_tokenize(text.lower())
+    for token in tokens:
+        if token.isalpha():
+            # Remove stopwords and stem the word
+            if token not in stop_words:
+                stemmed_token = stemmer.stem(token)
+                result.append(stemmed_token)
+    return result
+
+
+vectorizer = CountVectorizer(tokenizer=stemming_tokenizer)
+
 
 def preprocess():
+    
+    global processed_tokens
     
     X = vectorizer.fit_transform(documents)
 
     # Get the vocabulary 
     vocabulary = vectorizer.get_feature_names_out()
+
+    print(X.shape)
+    print(len(vocabulary))
+
+    processed_tokens = set(vocabulary)
     
-    # stem words
-    for word in vocabulary:
-     processed_tokens.add(stemmer.stem(word))
+
 
 
 def extract_documents(folder_path):
@@ -39,16 +59,20 @@ def extract_documents(folder_path):
     files = os.listdir(folder_path)
     
     # Iterate through each file
+    size = 0
     for file_name in files:
         
         file_path = os.path.join(folder_path, file_name)
         
         with open(file_path, 'r', encoding='utf-8') as file:
-            document = file.read()
-            # Remove words enclosed within angle brackets
-            document = re.sub(markup_pattern, '', document)
-            documents.append(document)
+            # Split file into a collection of documents 
+            collection = re.findall(r'<DOC>(.*?)</DOC>', file.read(), re.DOTALL)
             
+            for document in collection:
+                # Remove words enclosed within angle brackets
+                document = re.sub(markup_pattern, '', document)
+                documents.append(document)
+
        
 
 # prepare documents and preprocess 
@@ -61,3 +85,4 @@ with open('Vocabulary.txt', 'w', encoding='utf-8') as output_file:
         output_file.write(token + '\n')
 
 print(len(processed_tokens))
+
