@@ -1,11 +1,11 @@
 import nltk
-from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 import os
 import re
 import time
 import json
+from nltk.tokenize import wordpunct_tokenize
 
 # test data
 # vocabulary = ['apples', 'bananas', 'pineapples']
@@ -70,7 +70,7 @@ def process_document(doc_text):
     
     processed_words = []
     # Tokenization: Split the document into words
-    tokens = word_tokenize(document.lower())  
+    tokens = wordpunct_tokenize(document.lower())  
     
     # Preprocess tokens
     for token in tokens:
