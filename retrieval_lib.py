@@ -71,11 +71,12 @@ def process_query(doc_text):
     # Tokenization: Split the document into words
     tokens = wordpunct_tokenize(document.lower())  
     
+    unnecessary = {'document', 'will', 'relevant', 'mention', 'discuss', 'note'}
     # Preprocess tokens
     for token in tokens:
         if token.isalpha():
             # Remove stopwords and stem the word
-            if token not in stop_words:
+            if (token not in stop_words) and (token not in unnecessary):
                 processed_words.append(stemmer.stem(token))
 
 
@@ -89,7 +90,8 @@ def query_splitter(file):
     Splits the documents in s file by the <DOC> tag and calls the process_document fcn. on each doc
     '''
     # first split all the documents in the file
-    documents = re.findall(r'<top>(.*?)<desc>', file, re.DOTALL)
+    documents = re.findall(r'<top>(.*?)</top>', file, re.DOTALL)
+    
     processed_documents = {}
 
     # process each document - a document being everything contained in the <DOC> tags
@@ -103,7 +105,8 @@ def query_splitter(file):
 
 def getRelevantDocs(query):
     relevant_docs = set()
-    for term in query:
+    query_unique = set(query)
+    for term in query_unique:
         if invertedIndex.get(term) != None:
             currtermdocs = set(invertedIndex.get(term).keys())
             for doc in currtermdocs:
@@ -151,12 +154,12 @@ def runner(queries):
     for index,querytuple in queries.items():
         
         relevant_docs = getRelevantDocs(querytuple[1])
-        print(len(relevant_docs))
+        print('Relevant docs', len(relevant_docs))
         tokenized_corpus = getTokenizedCorpus(relevant_docs)
-        print(len(tokenized_corpus))
+        print('Size of tokenized corpus', len(tokenized_corpus))
 
         curr_query_scores = get_scores(tokenized_corpus,relevant_docs,querytuple[1])
-        print(len(curr_query_scores))
+        print('Query score length',len(curr_query_scores))
         output.append((index, curr_query_scores))
         print('Query, ',index, ' processed: ', querytuple[1])
 
