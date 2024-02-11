@@ -1,6 +1,3 @@
-'''
-Doing things right, as they should have been from the start
-'''
 import re
 import os
 import time
