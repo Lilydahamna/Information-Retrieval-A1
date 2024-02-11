@@ -7,6 +7,7 @@ from nltk.stem import PorterStemmer
 import json
 import time
 from nltk.tokenize import wordpunct_tokenize
+from nltk.stem import SnowballStemmer
 
 
 # corpus = [
@@ -41,7 +42,7 @@ Approach using library:
 nltk.download('punkt')
 nltk.download('stopwords')
 # Initialize Porter Stemmer
-porter = PorterStemmer()
+stemmer = SnowballStemmer("english")
 
 # Initialize set of stopwords by combining provided stopwords with the ones in the NLTK resource
 file_path = 'StopWords.txt'
@@ -75,8 +76,7 @@ def process_query(doc_text):
         if token.isalpha():
             # Remove stopwords and stem the word
             if token not in stop_words:
-                stemmed_token = porter.stem(token)
-                processed_words.append(stemmed_token)
+                processed_words.append(stemmer.stem(token))
 
 
     # Return document ID and the rest of the information without tags
